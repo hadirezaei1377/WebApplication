@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"text/template"
+	"time"
 )
 
 const version = "1.0.0"
@@ -31,6 +34,28 @@ type application struct {
 	errorLog      *log.Logger
 	templateCache map[string]*template.Template
 	version       string
+}
+
+// create web server
+// its have a reciever named app that point to application
+func (app *application) serve() error {
+	// srv get your values from server in http by &
+	srv := &http.Server{
+		// address
+		Addr:    fmt.Sprintf(":%d", app.config.port),
+		Handler: app.routes(),
+		// The amount of time that the connection will be closed automatically if the user does not use the connection.
+		IdleTimeout: 30 * time.Second,
+		//  covers the time from when the connection is accepted to when the request body is fully read
+		ReadTimeout:       10 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		// the maximum duration before timing out writes of the respons
+		WriteTimeout: 5 * time.Second,
+	}
+
+	app.infoLog.Println("Starting HTTP server in %s mode on port %d", app.config.env, app.config.port)
+
+	return srv.ListenAndServe()
 }
 
 func main() {
