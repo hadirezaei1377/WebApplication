@@ -45,15 +45,20 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 // partial means etc
 func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, page string, td *templateData, partials ...string) error {
 	var t *template.Template
+	// normally we dont define err type
 	var err error
+	// what template do i want to render?
 	templateToRender := fmt.Sprintf("templates/%s.page.tmpl", page)
 
+	// If the desired template already exists
 	_, templateInMap := app.templateCache[templateToRender]
 
+	// add or remove templates feature aoutomatically and withaout need to stop and restart layers
 	if app.config.env == "production" && templateInMap {
 		t = app.templateCache[templateToRender]
 	} else {
 		t, err = app.parseTemplate(partials, page, templateToRender)
+		// check
 		if err != nil {
 			app.errorLog.Println(err)
 			return err
@@ -73,4 +78,29 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 	}
 
 	return nil
+}
+
+func (app *application) parseTemplate(partials []string, page, templateToRender string) (*template.Template, error) {
+	var t *template.Template
+	var err error
+	// build partials
+	if len(partials) > 0 {
+		for i, x := range partials {
+			partials[i] = fmt.Sprintf("templates/%s.partial.tmpl", x)
+		}
+	}
+
+	// add partial
+	if len(partials) > 0 {
+		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", Strings.Join(partials, ","), templateToRender)
+	} else {
+		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
+	}
+	if err != nil {
+		app.errorLog.Println(err)
+		return nil, err
+	}
+
+	app.templateCache[templateToRender] = t
+	return t, nil
 }
