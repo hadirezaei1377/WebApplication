@@ -8,3 +8,9 @@ International payment capability
 
 We also use the GNU operating system to control versions.
 We will use the MariaDB database to store information.
+
+we will use starter template with bootstrap(copy code from bootstrap from its site to .tmpl file)
+an example for basic file
+
+
+
