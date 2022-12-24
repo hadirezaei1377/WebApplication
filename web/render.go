@@ -50,7 +50,7 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 	var t *template.Template
 	// what template do i want to render?
 	var err error
-	templateToRender := fmt.Sprintf("templates/%s.page.tmpl", page)
+	templateToRender := fmt.Sprintf("templates/%s.page.gohtml", page)
 
 	// If the desired template already exists
 	_, templateInMap := app.templateCache[templateToRender]
@@ -89,22 +89,20 @@ func (app *application) parseTemplate(partials []string, page, templateToRender 
 	// build partials
 	if len(partials) > 0 {
 		for i, x := range partials {
-			partials[i] = fmt.Sprintf("templates/%s.partial.tmpl", x)
+			partials[i] = fmt.Sprintf("templates/%s.partial.gohtml", x)
 		}
 	}
 	// partial for developer
 	// add partial
 	if len(partials) > 0 {
 		// use in folder template the file
-		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", strings.Join(partials, ","), templateToRender)
+		t, err = template.New(fmt.Sprintf("%s.page.gohtml", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.gohtml", strings.Join(partials, ","), templateToRender)
 	} else {
-		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
+		t, err = template.New(fmt.Sprintf("%s.page.gohtml", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.gohtml", templateToRender)
 	}
 	if err != nil {
 		app.errorLog.Println(err)
 		return nil, err
 	}
 
-	app.templateCache[templateToRender] = t
-	return t, nil
 }

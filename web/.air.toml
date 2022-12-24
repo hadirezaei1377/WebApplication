@@ -13,7 +13,7 @@ bin = "tmp main"
 # Customize binary.
 full_bin = "STRIPE_SECRET=sk_test_mXWrR1RN6fjIJnDsLPq1mAGX STRIPE_KEY=pk_test_lOwqX0SiQCGm7wSkqNoBgMLc ./tmp/main"
 # Watch these filename extensions.
-include_ext = ["go", "tpl", "tmpl", "html"]
+include_ext = ["go", "tpl", "tmpl", "html", "gohtml"]
 # Ignore these filename extensions or directories.
 exclude_dir = ["assets", "tmp", "vendor", "frontend/node_modules"]
 # Watch these directories if you specified.
