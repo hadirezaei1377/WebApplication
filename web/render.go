@@ -3,8 +3,9 @@ package main
 import (
 	"embed"
 	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
+	"strings"
 )
 
 // turns website code into the interactive pages
@@ -27,7 +28,6 @@ type templateData struct {
 }
 
 // passing functions to templaet
-
 var functions = template.FuncMap{}
 
 // template file system
@@ -40,14 +40,16 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 
 // td is any info in struct template data that we will add
 
-// function for rendering a template
-// page is a template we want to render it
-// partial means etc
+/*
+ function for rendering a template
+ page is a template we want to render it
+ partial means etc
+*/
 func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, page string, td *templateData, partials ...string) error {
-	var t *template.Template
 	// normally we dont define err type
-	var err error
+	var t *template.Template
 	// what template do i want to render?
+	var err error
 	templateToRender := fmt.Sprintf("templates/%s.page.tmpl", page)
 
 	// If the desired template already exists
@@ -58,7 +60,6 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 		t = app.templateCache[templateToRender]
 	} else {
 		t, err = app.parseTemplate(partials, page, templateToRender)
-		// check
 		if err != nil {
 			app.errorLog.Println(err)
 			return err
@@ -82,19 +83,20 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 
 func (app *application) parseTemplate(partials []string, page, templateToRender string) (*template.Template, error) {
 	var t *template.Template
+	// build partials
 	var err error
+
 	// build partials
 	if len(partials) > 0 {
 		for i, x := range partials {
 			partials[i] = fmt.Sprintf("templates/%s.partial.tmpl", x)
 		}
 	}
-
 	// partial for developer
 	// add partial
 	if len(partials) > 0 {
 		// use in folder template the file
-		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", Strings.Join(partials, ","), templateToRender)
+		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", strings.Join(partials, ","), templateToRender)
 	} else {
 		t, err = template.New(fmt.Sprintf("%s.page.tmpl", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.tmpl", templateToRender)
 	}
